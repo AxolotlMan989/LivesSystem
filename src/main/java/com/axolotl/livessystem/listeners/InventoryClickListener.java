@@ -9,8 +9,10 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
@@ -27,28 +29,53 @@ public class InventoryClickListener implements Listener {
         this.plugin = plugin;
     }
 
+    // ─── Route clicks ─────────────────────────────────────────────────────────
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player clicker)) return;
         String title = event.getView().getTitle();
 
-        // ── Revive GUI ────────────────────────────────────────────────────────
         if (title.contains("Revive Menu")) {
             handleReviveClick(event, clicker);
-            return;
-        }
-
-        // ── Recipe Editor GUI ─────────────────────────────────────────────────
-        if (title.contains("Edit Recipe:")) {
+        } else if (title.contains("Edit Recipe:")) {
             handleEditorClick(event, clicker);
-            return;
+        }
+    }
+
+    /**
+     * Block dragging items into non-grid slots of the editor.
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        String title = event.getView().getTitle();
+        if (!title.contains("Edit Recipe:")) return;
+
+        RecipeEditorGUI editor = plugin.getRecipeEditorGUI();
+        for (int slot : event.getRawSlots()) {
+            // Only allow dragging into grid slots (slots 0-53 that are grid slots)
+            if (slot < 54 && !editor.isGridSlot(slot)) {
+                event.setCancelled(true);
+                return;
+            }
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
-        // Clean up editor metadata when GUI is closed
+        // Return any items left in grid slots to the player's inventory on close
+        if (event.getView().getTitle().contains("Edit Recipe:")) {
+            RecipeEditorGUI editor = plugin.getRecipeEditorGUI();
+            for (int slot : RecipeEditorGUI.GRID_SLOTS) {
+                ItemStack item = event.getInventory().getItem(slot);
+                if (item != null && item.getType() != Material.AIR && !editor.isUIItem(item)) {
+                    player.getInventory().addItem(item);
+                    event.getInventory().setItem(slot, null);
+                }
+            }
+        }
         player.removeMetadata(RecipeEditorGUI.META_ITEM_TYPE, plugin);
         player.removeMetadata(RecipeEditorGUI.META_SHAPED, plugin);
     }
@@ -122,62 +149,105 @@ public class InventoryClickListener implements Listener {
         RecipeEditorGUI editor = plugin.getRecipeEditorGUI();
         LivesManager lm = plugin.getLivesManager();
 
-        // Get editor state from metadata
         List<MetadataValue> typeMeta   = clicker.getMetadata(RecipeEditorGUI.META_ITEM_TYPE);
         List<MetadataValue> shapedMeta = clicker.getMetadata(RecipeEditorGUI.META_SHAPED);
         if (typeMeta.isEmpty()) return;
 
         String itemType = typeMeta.get(0).asString();
-        boolean shaped  = shapedMeta.isEmpty() ? true : shapedMeta.get(0).asInt() == 1;
+        boolean shaped  = shapedMeta.isEmpty() || shapedMeta.get(0).asInt() == 1;
 
-        // ── Close button ──
-        if (slot == RecipeEditorGUI.SLOT_CLOSE) {
+        // ── Clicks inside the GUI (slots 0-53) ──────────────────────────────
+        if (slot >= 0 && slot < 54) {
+
+            // Grid slots — allow all normal interaction
+            if (editor.isGridSlot(slot)) {
+                // Only block if trying to place a UI filler item from cursor
+                ItemStack cursor = event.getCursor();
+                if (cursor != null && !cursor.getType().isAir() && editor.isUIItem(cursor)) {
+                    event.setCancelled(true);
+                }
+                // Otherwise: let it through so player can place/take/swap freely
+                return;
+            }
+
+            // Close button
+            if (slot == RecipeEditorGUI.SLOT_CLOSE) {
+                event.setCancelled(true);
+                // Return grid items before closing
+                for (int s : RecipeEditorGUI.GRID_SLOTS) {
+                    ItemStack item = event.getInventory().getItem(s);
+                    if (item != null && !item.getType().isAir() && !editor.isUIItem(item)) {
+                        clicker.getInventory().addItem(item.clone());
+                        event.getInventory().setItem(s, null);
+                    }
+                }
+                clicker.closeInventory();
+                return;
+            }
+
+            // Save button
+            if (slot == RecipeEditorGUI.SLOT_SAVE) {
+                event.setCancelled(true);
+                editor.saveGridToConfig(event.getInventory(), itemType, shaped);
+                String label = itemType.equals("revivebook") ? "Revive Book" : "Life Token";
+                clicker.sendMessage(lm.colorize("&aRecipe for &6" + label + " &asaved and activated!"));
+                // Return grid items
+                for (int s : RecipeEditorGUI.GRID_SLOTS) {
+                    ItemStack item = event.getInventory().getItem(s);
+                    if (item != null && !item.getType().isAir() && !editor.isUIItem(item)) {
+                        clicker.getInventory().addItem(item.clone());
+                        event.getInventory().setItem(s, null);
+                    }
+                }
+                clicker.closeInventory();
+                return;
+            }
+
+            // Mode toggle
+            if (slot == RecipeEditorGUI.SLOT_MODE) {
+                event.setCancelled(true);
+                boolean newShaped = !shaped;
+                clicker.setMetadata(RecipeEditorGUI.META_SHAPED,
+                        new org.bukkit.metadata.FixedMetadataValue(plugin, newShaped ? 1 : 0));
+                event.getInventory().setItem(RecipeEditorGUI.SLOT_MODE,
+                        editor.buildModeButton(newShaped));
+                clicker.sendMessage(lm.colorize("&7Recipe mode: "
+                        + (newShaped ? "&bShaped" : "&eShapeless")));
+                return;
+            }
+
+            // Output / arrow — never interact
+            if (slot == RecipeEditorGUI.SLOT_OUTPUT || slot == RecipeEditorGUI.SLOT_ARROW) {
+                event.setCancelled(true);
+                return;
+            }
+
+            // Any other GUI slot (filler) — cancel
             event.setCancelled(true);
-            clicker.closeInventory();
             return;
         }
 
-        // ── Save button ──
-        if (slot == RecipeEditorGUI.SLOT_SAVE) {
-            event.setCancelled(true);
-            editor.saveGridToConfig(event.getInventory(), itemType, shaped);
-            String label = itemType.equals("revivebook") ? "Revive Book" : "Life Token";
-            clicker.sendMessage(lm.colorize("&aRecipe for &6" + label + " &asaved and activated!"));
-            clicker.closeInventory();
-            return;
-        }
-
-        // ── Mode toggle ──
-        if (slot == RecipeEditorGUI.SLOT_MODE) {
-            event.setCancelled(true);
-            boolean newShaped = !shaped;
-            clicker.setMetadata(RecipeEditorGUI.META_SHAPED,
-                    new org.bukkit.metadata.FixedMetadataValue(plugin, newShaped ? 1 : 0));
-            event.getInventory().setItem(RecipeEditorGUI.SLOT_MODE,
-                    editor.buildModeButton(newShaped));
-            clicker.sendMessage(lm.colorize("&7Recipe mode set to: "
-                    + (newShaped ? "&bShaped" : "&eSHAPELESS")));
-            return;
-        }
-
-        // ── Output slot — never allow interaction ──
-        if (slot == RecipeEditorGUI.SLOT_OUTPUT || slot == RecipeEditorGUI.SLOT_ARROW) {
-            event.setCancelled(true);
-            return;
-        }
-
-        // ── Grid slots — allow placing/removing items freely ──
-        if (editor.isGridSlot(slot)) {
-            // Allow — player can place/take items from grid slots naturally
-            // But cancel if the item being placed is a UI item
-            ItemStack cursor = event.getCursor();
-            if (cursor != null && editor.isUIItem(cursor)) {
+        // ── Clicks in the player's own inventory (slots 54+) ────────────────
+        // Allow normal interaction EXCEPT shift-click which would push items
+        // into non-grid GUI slots
+        if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+            // Only allow shift-click from player inventory if there's a free grid slot
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked != null && !clicked.getType().isAir()) {
+                // Find first empty grid slot and place item there manually
+                for (int gridSlot : RecipeEditorGUI.GRID_SLOTS) {
+                    ItemStack existing = event.getInventory().getItem(gridSlot);
+                    if (existing == null || existing.getType().isAir()) {
+                        event.setCancelled(true);
+                        event.getInventory().setItem(gridSlot, clicked.clone());
+                        clicker.getInventory().setItem(event.getSlot(), null);
+                        return;
+                    }
+                }
+                // No free grid slot — cancel
                 event.setCancelled(true);
             }
-            return;
         }
-
-        // ── Everything else (filler/background) — cancel ──
-        event.setCancelled(true);
+        // All other player inventory clicks: allow freely
     }
 }

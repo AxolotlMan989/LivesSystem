@@ -126,7 +126,6 @@ Items are identified by their **display name**. This means:
 | Command | Description | Permission |
 |---|---|---|
 | `/lives [player]` | Check your own or another player's lives | `livessystem.lives` |
-| `/withdrawlife [amount]` | Convert one or more of your lives into Life Tokens | `livessystem.withdraw` |
 | `/setlives <player> <amount>` | Set a player's lives to a specific amount | `livessystem.admin` |
 | `/addlives <player> <amount>` | Add lives to a player | `livessystem.admin` |
 | `/removelives <player> <amount>` | Remove lives from a player | `livessystem.admin` |
@@ -134,7 +133,7 @@ Items are identified by their **display name**. This means:
 | `/lifetoken [player]` | Give a Life Token to yourself or a player | `livessystem.admin` |
 | `/livesreload` | Reload `config.yml` without restarting | `livessystem.admin` |
 | `/livesreset` | Wipe all lives data and start fresh | `livessystem.admin` |
-
+| `/withdrawlife [amount]` | Convert one or more of your lives into Life Tokens | `livessystem.withdraw` |
 
 ---
 
