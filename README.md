@@ -50,7 +50,7 @@ You cannot drop the source code directly into your server — you need to compil
 2. Restart the server
 3. A `plugins/LivesSystem/config.yml` will be generated automatically
 
-> No datapack is required. Crafting recipes are handled entirely by the plugin and configured in-game.
+> No datapack is required. Crafting recipes are handled entirely by the plugin and configured in-game via `/lsconfig`.
 
 ---
 
@@ -61,11 +61,14 @@ You cannot drop the source code directly into your server — you need to compil
 - **Spectator mode on elimination** — players with 0 lives are automatically moved to Spectator and restored on revive
 - **Revive Book** — right-click to open a paginated GUI showing all eliminated players as their own heads; click a head to revive them
 - **Life Token** — right-click in hand to instantly gain extra lives
-- **Life Token drops on death** — players drop a Life Token when they die, letting killers claim it or the victim recover it; configurable to PvP-only
+- **Life Token drops on death** — players drop a Life Token when they die, letting killers claim it or the victim recover it; configurable to PvP kills only
 - **Life withdrawing** — players can convert their own lives into Life Tokens to share with others
-- **In-game recipe editor** — change crafting recipes for both items without ever editing a file or restarting, with support for plugin items as ingredients
-- **Shaped and shapeless recipes** — toggle between recipe types in the editor GUI
-- **TAB list display** — shows each player's lives next to their name, color-coded by how many they have left
+- **Centralized config GUI** — `/lsconfig` opens a single menu to toggle features and access recipe editors
+- **In-game recipe editor** — change crafting recipes for both items without editing any files, with support for plugin items as ingredients
+- **Shaped and shapeless recipes** — toggle between recipe types in the editor
+- **Per-life TAB colors** — configure a color for each life count from 0 to 10
+- **Item enable toggles** — disable the Revive Book or Life Token entirely from the config GUI
+- **TAB list display** — shows each player's lives next to their name, color-coded by count
 - **Action bar messages** — death, elimination, and revive notifications shown on screen
 - **Fully configurable** — messages, sounds, TAB format, item names, lore, and recipes all configurable
 
@@ -84,12 +87,12 @@ Used to bring eliminated players back into the game.
 
 **How to obtain:**
 - Admin command: `/revivebook [player]`
-- Crafting table (default recipe below, changeable in-game via `/editrevivebookrecipe`)
+- Crafting table (recipe configurable in-game via `/lsconfig`)
 
 **Default recipe (shaped):**
 ```
 T S T
-S T S    T = Life Token  |  S = Soul Sand
+S B S    T = Life Token  |  S = Soul Sand  |  B = Enchanted Book
 T S T
 ```
 
@@ -105,15 +108,15 @@ Used to grant yourself an extra life.
 
 **How to obtain:**
 - Admin command: `/lifetoken [player]`
-- Crafting table (default recipe below, changeable in-game via `/editlifetokenrecipe`)
+- Crafting table (recipe configurable in-game via `/lsconfig`)
 - Picked up from the ground after a player dies (if `drop-token-on-death` is enabled)
 - Another player using `/withdrawlife` to convert their own life into a token
 
 **Default recipe (shaped):**
 ```
-G I G
-I N I    G = Gold Nugget  |  I = Iron Nugget  |  N = Nether Star
-G I G
+S I S
+I N I    S = Soul Sand  |  I = Iron Nugget  |  N = Nether Star
+S I S
 ```
 
 ---
@@ -121,8 +124,9 @@ G I G
 ### ⚠️ Item Identification Note
 Items are identified by their **display name**. This means:
 - Any item renamed to match (e.g. via anvil) will be treated as that item
-- If you change an item's `name` in `config.yml`, make sure to also update the recipe via the editor commands so the crafted result is still recognised
+- If you change an item's `name` in `config.yml`, update the recipe via `/lsconfig` so crafted results are still recognised
 - The admin commands (`/revivebook`, `/lifetoken`) always give correctly named items
+- Items can be fully disabled from `/lsconfig` — disabled items won't work even if held or crafted
 
 ---
 
@@ -146,9 +150,38 @@ When a player right-clicks with a Revive Book, a **54-slot chest GUI** opens:
 
 ---
 
+## ⚙️ Config GUI — `/lsconfig`
+
+Run `/lsconfig` to open the centralized configuration menu. No restart required for any toggle.
+
+```
+[Revive Book][Life Token][Drop Token][PvP Only][TAB Display][ . ][ . ][ . ][ . ]
+[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
+[Edit RB Recipe][Edit LT Recipe][ . ][ . ][ . ][ . ][ . ][ File-Only Info ][ . ]
+[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
+[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
+[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][CLOSE]
+```
+
+| Button | Description |
+|---|---|
+| Revive Book | Toggle the Revive Book item on/off |
+| Life Token | Toggle the Life Token item on/off |
+| Drop Token | Toggle Life Token drop on death on/off |
+| PvP Only | Toggle whether token only drops on player kills |
+| TAB Display | Toggle the lives display in the TAB list |
+| Edit RB Recipe | Open the recipe editor for the Revive Book |
+| Edit LT Recipe | Open the recipe editor for the Life Token |
+| File-Only Info | Lists all settings that must be edited in `config.yml` |
+| CLOSE | Close the menu |
+
+Toggles show **green** when enabled and **red** when disabled. Changes save instantly.
+
+---
+
 ## 🧰 Recipe Editor
 
-Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe editor. No restart or file editing required.
+Accessible from `/lsconfig`. No restart or file editing required.
 
 ```
 [ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
@@ -164,17 +197,16 @@ Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe
 | Slots 1–9 | The crafting grid — drag items from your inventory into these slots |
 | OUT | Preview of the resulting named item (display only) |
 | MOD | Toggle between **Shaped** (position matters) and **Shapeless** (any order) |
-| RBK | Insert a **Revive Book** slot into the next empty grid space |
-| LTK | Insert a **Life Token** slot into the next empty grid space |
+| RBK | Insert a **Revive Book** requirement into the next empty grid slot |
+| LTK | Insert a **Life Token** requirement into the next empty grid slot |
 | SAV | Save the recipe and activate it immediately |
-| CLO | Close without saving — items are returned to your inventory |
+| CLO | Close without saving — items in the grid are returned to your inventory |
 
 **Tips:**
-- Shift-click an item from your inventory to send it straight to the first empty grid slot
+- Shift-click an item from your inventory to send it to the first empty grid slot
 - Use RBK/LTK to require plugin items as ingredients — these match by display name, not just material
-- Any items left in the grid when you close or save are automatically returned to you
-- The recipe activates instantly on save — no reload or restart needed
-- Recipes are saved to `config.yml` and persist across restarts
+- Any items left in the grid when closing or saving are returned to you automatically
+- Changes take effect instantly on save — no reload or restart needed
 
 ---
 
@@ -208,10 +240,11 @@ OP only by default.
 
 | Command | Description | Permission |
 |---|---|---|
-| `/editrevivebookrecipe` | Open the recipe editor for the Revive Book | `livessystem.admin` |
-| `/editlifetokenrecipe` | Open the recipe editor for the Life Token | `livessystem.admin` |
+| `/lsconfig` | Open the centralized config GUI | `livessystem.admin` |
 | `/livesreload` | Reload `config.yml` without restarting | `livessystem.admin` |
 | `/livesreset` | Wipe all lives data and start fresh | `livessystem.admin` |
+
+> Note: `/editrevivebookrecipe` and `/editlifetokenrecipe` still work as standalone commands but are also accessible from `/lsconfig`.
 
 ---
 
@@ -230,6 +263,16 @@ OP only by default.
 
 Found at `plugins/LivesSystem/config.yml` after first launch. Use `/livesreload` to apply changes without restarting.
 
+### What can be configured in-game via `/lsconfig`
+- Revive Book enabled/disabled
+- Life Token enabled/disabled
+- Drop token on death on/off
+- PvP-only token drop on/off
+- TAB display on/off
+- Both crafting recipes
+
+### What must be configured in `config.yml`
+
 ```yaml
 # Lives settings
 starting-lives: 5         # Lives each player starts with on first join
@@ -238,24 +281,29 @@ revive-lives: 1           # Lives given to a player when revived
 life-token-lives: 1       # Lives granted by one Life Token
 withdraw-min-lives: 2     # Minimum lives a player must keep when withdrawing
 
-# Life Token drop on death
-drop-token-on-death: true      # Whether a Life Token drops when a player dies
-drop-token-pvp-only: false     # If true, token only drops on player kills
-
 # TAB list
 tab-display: true
 tab-format: "&c❤ %lives% lives"   # %lives% = current lives count
+# Color per lives count (0-10). Lives above 10 use the color for 10.
 tab-colors:
-  high: "&a"              # 4+ lives (green)
-  medium: "&e"            # 2-3 lives (yellow)
-  low: "&c"               # 1 life (red)
-  dead: "&8"              # eliminated (grey)
+  0:  "&8"    # eliminated
+  1:  "&4"
+  2:  "&c"
+  3:  "&6"
+  4:  "&e"
+  5:  "&e"
+  6:  "&a"
+  7:  "&a"
+  8:  "&a"
+  9:  "&2"
+  10: "&2"
 
 # Action bar notifications
 action-bar: true
 
 # Revive Book item
 revive-book:
+  enabled: true
   material: ENCHANTED_BOOK
   name: "&6&lRevive Book"
   lore:
@@ -266,6 +314,7 @@ revive-book:
 
 # Life Token item
 life-token:
+  enabled: true
   material: NETHER_STAR
   name: "&b&lLife Token"
   lore:
@@ -282,9 +331,9 @@ sounds:
   life-token: ENTITY_EXPERIENCE_ORB_PICKUP
 ```
 
-All messages are also configurable under the `messages:` section. Color codes use the `&` prefix — e.g. `&c` = red, `&a` = green, `&e` = yellow, `&l` = bold.
+All messages are configurable under the `messages:` section using `&` color codes.
 
-> **Note:** Recipe grids are stored under `revive-book.recipe` and `life-token.recipe` in `config.yml`. These are managed automatically by the in-game editor — you generally don't need to edit them manually.
+> Recipe grids are stored under `revive-book.recipe` and `life-token.recipe` and are managed automatically by the in-game editor.
 
 ---
 
