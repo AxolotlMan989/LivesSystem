@@ -1,7 +1,6 @@
 package com.axolotl.livessystem.listeners;
 
 import com.axolotl.livessystem.LivesSystem;
-import com.axolotl.livessystem.gui.ConfigGUI;
 import com.axolotl.livessystem.gui.RecipeEditorGUI;
 import com.axolotl.livessystem.gui.ReviveGUI;
 import com.axolotl.livessystem.managers.LivesManager;
@@ -35,9 +34,7 @@ public class InventoryClickListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player clicker)) return;
         String title = event.getView().getTitle();
 
-        if (title.equals(ConfigGUI.GUI_TITLE)) {
-            handleConfigClick(event, clicker);
-        } else if (title.contains("Revive Menu")) {
+        if (title.contains("Revive Menu")) {
             handleReviveClick(event, clicker);
         } else if (title.contains("Edit Recipe:")) {
             handleEditorClick(event, clicker);
@@ -48,10 +45,6 @@ public class InventoryClickListener implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = event.getView().getTitle();
-        if (title.equals(ConfigGUI.GUI_TITLE)) {
-            event.setCancelled(true);
-            return;
-        }
         if (!title.contains("Edit Recipe:")) return;
         RecipeEditorGUI editor = plugin.getRecipeEditorGUI();
         for (int slot : event.getRawSlots()) {
@@ -77,76 +70,6 @@ public class InventoryClickListener implements Listener {
         }
         player.removeMetadata(RecipeEditorGUI.META_ITEM_TYPE, plugin);
         player.removeMetadata(RecipeEditorGUI.META_SHAPED, plugin);
-    }
-
-    // ─── Config GUI ───────────────────────────────────────────────────────────
-
-    private void handleConfigClick(InventoryClickEvent event, Player clicker) {
-        event.setCancelled(true);
-        int slot = event.getRawSlot();
-        if (slot < 0 || slot >= 54) return;
-
-        ConfigGUI gui = plugin.getConfigGUI();
-        LivesManager lm = plugin.getLivesManager();
-
-        // Close
-        if (slot == ConfigGUI.SLOT_CLOSE) {
-            clicker.closeInventory();
-            return;
-        }
-
-        // Toggle slots
-        if (gui.isToggleSlot(slot)) {
-            ItemStack item = event.getCurrentItem();
-            String configKey = gui.extractConfigKey(item);
-            if (configKey == null) return;
-
-            boolean current = plugin.getConfig().getBoolean(configKey, true);
-            boolean newVal  = !current;
-            plugin.getConfig().set(configKey, newVal);
-            plugin.saveConfig();
-
-            // Refresh just this slot
-            event.getInventory().setItem(slot,
-                    buildRefreshedToggle(gui, slot, configKey, newVal));
-
-            clicker.sendMessage(lm.colorize("&7" + configKey + " set to: "
-                    + (newVal ? "&aenabled" : "&cdisabled")));
-
-            // Apply live if it's TAB display
-            if (configKey.equals("tab-display")) plugin.getTabManager().updateAll();
-            return;
-        }
-
-        // Recipe editors
-        if (slot == ConfigGUI.SLOT_EDIT_REVIVE_RECIPE) {
-            clicker.closeInventory();
-            plugin.getRecipeEditorGUI().open(clicker, "revivebook");
-            return;
-        }
-        if (slot == ConfigGUI.SLOT_EDIT_TOKEN_RECIPE) {
-            clicker.closeInventory();
-            plugin.getRecipeEditorGUI().open(clicker, "lifetoken");
-            return;
-        }
-    }
-
-    /** Re-builds a toggle item after it's been flipped. */
-    private ItemStack buildRefreshedToggle(ConfigGUI gui, int slot, String configKey, boolean newVal) {
-        // Map slots back to their label/description
-        return switch (slot) {
-            case ConfigGUI.SLOT_REVIVE_BOOK_ENABLED -> gui.buildTogglePublic(
-                    "Revive Book", configKey, "Allows players to use the Revive Book item.", true);
-            case ConfigGUI.SLOT_LIFE_TOKEN_ENABLED  -> gui.buildTogglePublic(
-                    "Life Token", configKey, "Allows players to use the Life Token item.", true);
-            case ConfigGUI.SLOT_DROP_TOKEN          -> gui.buildTogglePublic(
-                    "Drop Token on Death", configKey, "Players drop a Life Token when they die.", true);
-            case ConfigGUI.SLOT_PVP_ONLY            -> gui.buildTogglePublic(
-                    "PvP Only Token Drop", configKey, "Token only drops on player kills.", false);
-            case ConfigGUI.SLOT_TAB_DISPLAY         -> gui.buildTogglePublic(
-                    "TAB Lives Display", configKey, "Show lives count in the TAB list.", true);
-            default -> new ItemStack(Material.AIR);
-        };
     }
 
     // ─── Revive GUI ───────────────────────────────────────────────────────────

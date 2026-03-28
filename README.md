@@ -50,7 +50,7 @@ You cannot drop the source code directly into your server — you need to compil
 2. Restart the server
 3. A `plugins/LivesSystem/config.yml` will be generated automatically
 
-> No datapack is required. Crafting recipes are handled entirely by the plugin and configured in-game via `/lsconfig`.
+> No datapack is required. Crafting recipes are handled entirely by the plugin and configured in-game via `/editrevivebookrecipe` and `/editlifetokenrecipe`.
 
 ---
 
@@ -63,7 +63,6 @@ You cannot drop the source code directly into your server — you need to compil
 - **Life Token** — right-click in hand to instantly gain extra lives
 - **Life Token drops on death** — players drop a Life Token when they die, letting killers claim it or the victim recover it; configurable to PvP kills only
 - **Life withdrawing** — players can convert their own lives into Life Tokens to share with others
-- **Centralized config GUI** — `/lsconfig` opens a single menu to toggle features and access recipe editors
 - **In-game recipe editor** — change crafting recipes for both items without editing any files, with support for plugin items as ingredients
 - **Shaped and shapeless recipes** — toggle between recipe types in the editor
 - **Per-life TAB colors** — configure a color for each life count from 0 to 10
@@ -87,7 +86,7 @@ Used to bring eliminated players back into the game.
 
 **How to obtain:**
 - Admin command: `/revivebook [player]`
-- Crafting table (recipe configurable in-game via `/lsconfig`)
+- Crafting table (recipe configurable in-game via `/editrevivebookrecipe`)
 
 **Default recipe (shaped):**
 ```
@@ -108,7 +107,7 @@ Used to grant yourself an extra life.
 
 **How to obtain:**
 - Admin command: `/lifetoken [player]`
-- Crafting table (recipe configurable in-game via `/lsconfig`)
+- Crafting table (recipe configurable in-game via `/editlifetokenrecipe`)
 - Picked up from the ground after a player dies (if `drop-token-on-death` is enabled)
 - Another player using `/withdrawlife` to convert their own life into a token
 
@@ -124,9 +123,9 @@ S I S
 ### ⚠️ Item Identification Note
 Items are identified by their **display name**. This means:
 - Any item renamed to match (e.g. via anvil) will be treated as that item
-- If you change an item's `name` in `config.yml`, update the recipe via `/lsconfig` so crafted results are still recognised
+- If you change an item's `name` in `config.yml`, update the recipe via `/editrevivebookrecipe` or `/editlifetokenrecipe` so crafted results are still recognised
 - The admin commands (`/revivebook`, `/lifetoken`) always give correctly named items
-- Items can be fully disabled from `/lsconfig` — disabled items won't work even if held or crafted
+- Items can be fully disabled by setting `enabled: false` in `config.yml`
 
 ---
 
@@ -150,38 +149,9 @@ When a player right-clicks with a Revive Book, a **54-slot chest GUI** opens:
 
 ---
 
-## ⚙️ Config GUI — `/lsconfig`
-
-Run `/lsconfig` to open the centralized configuration menu. No restart required for any toggle.
-
-```
-[Revive Book][Life Token][Drop Token][PvP Only][TAB Display][ . ][ . ][ . ][ . ]
-[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
-[Edit RB Recipe][Edit LT Recipe][ . ][ . ][ . ][ . ][ . ][ File-Only Info ][ . ]
-[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
-[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
-[ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][CLOSE]
-```
-
-| Button | Description |
-|---|---|
-| Revive Book | Toggle the Revive Book item on/off |
-| Life Token | Toggle the Life Token item on/off |
-| Drop Token | Toggle Life Token drop on death on/off |
-| PvP Only | Toggle whether token only drops on player kills |
-| TAB Display | Toggle the lives display in the TAB list |
-| Edit RB Recipe | Open the recipe editor for the Revive Book |
-| Edit LT Recipe | Open the recipe editor for the Life Token |
-| File-Only Info | Lists all settings that must be edited in `config.yml` |
-| CLOSE | Close the menu |
-
-Toggles show **green** when enabled and **red** when disabled. Changes save instantly.
-
----
-
 ## 🧰 Recipe Editor
 
-Accessible from `/lsconfig`. No restart or file editing required.
+Accessible via `/editrevivebookrecipe` and `/editlifetokenrecipe`. No restart or file editing required.
 
 ```
 [ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
@@ -240,11 +210,8 @@ OP only by default.
 
 | Command | Description | Permission |
 |---|---|---|
-| `/lsconfig` | Open the centralized config GUI | `livessystem.admin` |
 | `/livesreload` | Reload `config.yml` without restarting | `livessystem.admin` |
 | `/livesreset` | Wipe all lives data and start fresh | `livessystem.admin` |
-
-> Note: `/editrevivebookrecipe` and `/editlifetokenrecipe` still work as standalone commands but are also accessible from `/lsconfig`.
 
 ---
 
@@ -263,15 +230,9 @@ OP only by default.
 
 Found at `plugins/LivesSystem/config.yml` after first launch. Use `/livesreload` to apply changes without restarting.
 
-### What can be configured in-game via `/lsconfig`
-- Revive Book enabled/disabled
-- Life Token enabled/disabled
-- Drop token on death on/off
-- PvP-only token drop on/off
-- TAB display on/off
-- Both crafting recipes
-
 ### What must be configured in `config.yml`
+
+> Recipes can be changed in-game via `/editrevivebookrecipe` and `/editlifetokenrecipe`. Everything else requires editing `config.yml` and running `/livesreload`.
 
 ```yaml
 # Lives settings

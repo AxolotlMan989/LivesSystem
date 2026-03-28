@@ -42,10 +42,6 @@ commands:
     description: Withdraw a life and receive a Life Token
     usage: /withdrawlife [amount]
     permission: livessystem.withdraw
-  lsconfig:
-    description: Open the LivesSystem config GUI
-    usage: /lsconfig
-    permission: livessystem.admin
   editrevivebookrecipe:
     description: Open the recipe editor for the Revive Book
     usage: /editrevivebookrecipe
