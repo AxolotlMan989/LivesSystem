@@ -5,10 +5,14 @@ import com.axolotl.livessystem.managers.LivesManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class WithdrawLifeCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class WithdrawLifeCommand implements CommandExecutor, TabCompleter {
 
     private final LivesSystem plugin;
 
@@ -24,7 +28,6 @@ public class WithdrawLifeCommand implements CommandExecutor {
             sender.sendMessage(lm.colorize("&cThis command can only be run by a player."));
             return true;
         }
-
         if (!player.hasPermission("livessystem.withdraw")) {
             player.sendMessage(lm.colorize(plugin.getConfig().getString(
                     "messages.no-permission", "&cYou don't have permission to do that.")));
@@ -34,7 +37,6 @@ public class WithdrawLifeCommand implements CommandExecutor {
         int minLives = plugin.getConfig().getInt("withdraw-min-lives", 2);
         int current  = lm.getLives(player.getUniqueId());
 
-        // Parse optional amount argument — defaults to 1
         int amount = 1;
         if (args.length >= 1) {
             try {
@@ -44,23 +46,21 @@ public class WithdrawLifeCommand implements CommandExecutor {
                     return true;
                 }
             } catch (NumberFormatException e) {
-                player.sendMessage(lm.colorize("&cInvalid number."));
+                player.sendMessage(lm.colorize("&cPlease enter a number, e.g. /withdrawlife 2"));
                 return true;
             }
         }
 
-        // Must keep at least minLives after withdrawing
         if (current - amount < minLives) {
             String msg = lm.colorize(plugin.getConfig().getString(
                     "messages.withdraw-too-few",
-                    "&cYou need at least &e%min% &clives to withdraw. You currently have &e%lives%&c.")
-                    .replace("%min%", String.valueOf(minLives + amount))
+                    "&cYou need to keep at least &e%min% &clives. You currently have &e%lives%&c.")
+                    .replace("%min%", String.valueOf(minLives))
                     .replace("%lives%", String.valueOf(current)));
             player.sendMessage(msg);
             return true;
         }
 
-        // Deduct lives and give tokens
         lm.removeLives(player.getUniqueId(), amount);
 
         ItemStack token = plugin.getItemManager().createLifeToken();
@@ -77,7 +77,25 @@ public class WithdrawLifeCommand implements CommandExecutor {
                 .replace("%amount%", String.valueOf(amount))
                 .replace("%lives%", String.valueOf(newLives)));
         player.sendMessage(msg);
-
         return true;
+    }
+
+    /**
+     * Suggests how many lives the player can withdraw (1 up to max withdrawable),
+     * instead of defaulting to player names.
+     */
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command,
+                                      String label, String[] args) {
+        List<String> suggestions = new ArrayList<>();
+        if (args.length == 1 && sender instanceof Player player) {
+            int current  = plugin.getLivesManager().getLives(player.getUniqueId());
+            int minLives = plugin.getConfig().getInt("withdraw-min-lives", 2);
+            int maxWithdraw = current - minLives;
+            for (int i = 1; i <= maxWithdraw; i++) {
+                suggestions.add(String.valueOf(i));
+            }
+        }
+        return suggestions;
     }
 }

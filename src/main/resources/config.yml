@@ -11,7 +11,7 @@ max-lives: 10
 # How many lives a player gets when revived
 revive-lives: 1
 
-# Minimum lives a player must keep after withdrawing (they cannot go below this)
+# Minimum lives a player must keep after withdrawing
 withdraw-min-lives: 2
 
 # How many lives a Life Token grants when used
@@ -53,34 +53,6 @@ messages:
   no-eliminated: "&eNo players are currently eliminated."
 
 # ==============================
-#  Revive Book item
-# ==============================
-# NOTE: The item is identified by its display name.
-# If you change the name here, update the datapack recipe result name to match!
-revive-book:
-  material: BOOK
-  name: "&6&lRevive Book"
-  lore:
-    - "&7Right-click to open the revive menu."
-    - ""
-    - "&eGrants: &c%revive-lives% life/lives on revive"
-  consume-on-use: true
-
-# ==============================
-#  Life Token item
-# ==============================
-# NOTE: The item is identified by its display name.
-# If you change the name here, update the datapack recipe result name to match!
-life-token:
-  material: NETHER_STAR
-  name: "&b&lLife Token"
-  lore:
-    - "&7Right-click to gain an extra life."
-    - ""
-    - "&eGrants: &a+%token-lives% life/lives"
-  consume-on-use: true
-
-# ==============================
 #  Sounds
 # ==============================
 sounds:
@@ -90,11 +62,23 @@ sounds:
   life-token: ENTITY_EXPERIENCE_ORB_PICKUP
 
 # ==============================
-#  Recipe grids (managed in-game via /editrevivebookrecipe and /editlifetokenrecipe)
-#  Slots 0-8 map to the 3x3 crafting grid left-to-right, top-to-bottom.
-#  You can edit these manually or use the in-game editor commands.
+#  Revive Book
+#  NOTE: Items are identified by their display name.
+#  If you change 'name', you must also update the recipe via /editrevivebookrecipe.
 # ==============================
 revive-book:
+  # The base Minecraft item used for this custom item
+  material: BOOK
+  # Display name (supports & color codes)
+  name: "&6&lRevive Book"
+  # Lore lines (supports & color codes, %revive-lives% = revive-lives value)
+  lore:
+    - "&7Right-click to open the revive menu."
+    - ""
+    - "&eGrants: &c%revive-lives% life/lives on revive"
+  # Whether the book is consumed when used to revive
+  consume-on-use: true
+  # Recipe (managed via /editrevivebookrecipe — do not edit manually)
   recipe:
     shaped: true
     grid:
@@ -108,7 +92,24 @@ revive-book:
       7: SOUL_SAND
       8: NETHER_STAR
 
+# ==============================
+#  Life Token
+#  NOTE: Items are identified by their display name.
+#  If you change 'name', you must also update the recipe via /editlifetokenrecipe.
+# ==============================
 life-token:
+  # The base Minecraft item used for this custom item
+  material: NETHER_STAR
+  # Display name (supports & color codes)
+  name: "&b&lLife Token"
+  # Lore lines (supports & color codes, %token-lives% = life-token-lives value)
+  lore:
+    - "&7Right-click to gain an extra life."
+    - ""
+    - "&eGrants: &a+%token-lives% life/lives"
+  # Whether the token is consumed when used
+  consume-on-use: true
+  # Recipe (managed via /editlifetokenrecipe — do not edit manually)
   recipe:
     shaped: true
     grid:

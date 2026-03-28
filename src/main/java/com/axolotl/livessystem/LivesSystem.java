@@ -49,7 +49,9 @@ public class LivesSystem extends JavaPlugin {
         getCommand("lifetoken").setExecutor(new LifeTokenCommand(this));
         getCommand("livesreload").setExecutor(new ReloadCommand(this));
         getCommand("livesreset").setExecutor(new ResetCommand(this));
-        getCommand("withdrawlife").setExecutor(new WithdrawLifeCommand(this));
+        WithdrawLifeCommand withdrawLifeCommand = new WithdrawLifeCommand(this);
+        getCommand("withdrawlife").setExecutor(withdrawLifeCommand);
+        getCommand("withdrawlife").setTabCompleter(withdrawLifeCommand);
         getCommand("editrevivebookrecipe").setExecutor(new EditRecipeCommand(this, "revivebook"));
         getCommand("editlifetokenrecipe").setExecutor(new EditRecipeCommand(this, "lifetoken"));
 
