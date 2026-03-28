@@ -203,7 +203,34 @@ public class InventoryClickListener implements Listener {
                 return;
             }
 
-            // Mode toggle
+            // Insert Revive Book placeholder
+        if (slot == RecipeEditorGUI.SLOT_INSERT_BOOK) {
+            event.setCancelled(true);
+            // Find first empty grid slot
+            for (int s : RecipeEditorGUI.GRID_SLOTS) {
+                ItemStack existing = event.getInventory().getItem(s);
+                if (existing == null || existing.getType().isAir()) {
+                    event.getInventory().setItem(s, editor.buildReviveBookPlaceholder());
+                    break;
+                }
+            }
+            return;
+        }
+
+        // Insert Life Token placeholder
+        if (slot == RecipeEditorGUI.SLOT_INSERT_TOKEN) {
+            event.setCancelled(true);
+            for (int s : RecipeEditorGUI.GRID_SLOTS) {
+                ItemStack existing = event.getInventory().getItem(s);
+                if (existing == null || existing.getType().isAir()) {
+                    event.getInventory().setItem(s, editor.buildLifeTokenPlaceholder());
+                    break;
+                }
+            }
+            return;
+        }
+
+        // Mode toggle
             if (slot == RecipeEditorGUI.SLOT_MODE) {
                 event.setCancelled(true);
                 boolean newShaped = !shaped;
@@ -217,7 +244,8 @@ public class InventoryClickListener implements Listener {
             }
 
             // Output / arrow — never interact
-            if (slot == RecipeEditorGUI.SLOT_OUTPUT || slot == RecipeEditorGUI.SLOT_ARROW) {
+            if (slot == RecipeEditorGUI.SLOT_OUTPUT || slot == RecipeEditorGUI.SLOT_ARROW
+                || slot == RecipeEditorGUI.SLOT_INSERT_BOOK || slot == RecipeEditorGUI.SLOT_INSERT_TOKEN) {
                 event.setCancelled(true);
                 return;
             }

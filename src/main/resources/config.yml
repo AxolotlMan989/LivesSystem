@@ -68,7 +68,7 @@ sounds:
 # ==============================
 revive-book:
   # The base Minecraft item used for this custom item
-  material: BOOK
+  material: ENCHANTED_BOOK
   # Display name (supports & color codes)
   name: "&6&lRevive Book"
   # Lore lines (supports & color codes, %revive-lives% = revive-lives value)
@@ -82,15 +82,15 @@ revive-book:
   recipe:
     shaped: true
     grid:
-      0: NETHER_STAR
+      0: PLUGIN_LIFE_TOKEN
       1: SOUL_SAND
-      2: NETHER_STAR
+      2: PLUGIN_LIFE_TOKEN
       3: SOUL_SAND
-      4: ENCHANTED_BOOK
+      4: PLUGIN_LIFE_TOKEN
       5: SOUL_SAND
-      6: NETHER_STAR
+      6: PLUGIN_LIFE_TOKEN
       7: SOUL_SAND
-      8: NETHER_STAR
+      8: PLUGIN_LIFE_TOKEN
 
 # ==============================
 #  Life Token
