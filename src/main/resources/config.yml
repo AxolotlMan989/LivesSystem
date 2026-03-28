@@ -113,12 +113,12 @@ life-token:
   recipe:
     shaped: true
     grid:
-      0: GOLD_NUGGET
+      0: SOUL_SAND
       1: IRON_NUGGET
-      2: GOLD_NUGGET
+      2: SOUL_SAND
       3: IRON_NUGGET
       4: NETHER_STAR
       5: IRON_NUGGET
-      6: GOLD_NUGGET
+      6: SOUL_SAND
       7: IRON_NUGGET
-      8: GOLD_NUGGET
+      8: SOUL_SAND
