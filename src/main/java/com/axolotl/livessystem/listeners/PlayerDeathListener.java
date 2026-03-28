@@ -17,32 +17,41 @@ public class PlayerDeathListener implements Listener {
         this.plugin = plugin;
     }
 
-    // Run at LOW priority so we add to the drops list BEFORE Corps (or any other
-    // death loot mod) reads it at NORMAL/HIGH priority and collects items.
-    @EventHandler(priority = EventPriority.LOW)
+    /**
+     * LOWEST priority — runs before Corps and any other death loot mod,
+     * so the token is already in event.getDrops() when Corps collects it.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
-        // Handle lives loss
+        // ── Token drop ────────────────────────────────────────────────────────
+        // Do this BEFORE handleDeath() so we can read the pre-death lives count.
+        if (plugin.getConfig().getBoolean("drop-token-on-death", true)) {
+            dropTokenIfEligible(event, player);
+        }
+
+        // ── Lives deduction ───────────────────────────────────────────────────
         plugin.getLivesManager().handleDeath(player);
+    }
 
-        // Don't drop a token if the feature is disabled
-        if (!plugin.getConfig().getBoolean("drop-token-on-death", true)) return;
+    private void dropTokenIfEligible(PlayerDeathEvent event, Player player) {
+        // Don't drop if already eliminated (spectator players shouldn't die,
+        // but guard against edge cases)
+        if (plugin.getLivesManager().isEliminated(player.getUniqueId())) return;
 
-        // Don't drop if player was already eliminated before this death
-        int livesAfter = plugin.getLivesManager().getLives(player.getUniqueId());
-        if (livesAfter < 0) return;
+        // Don't drop if player has bypass permission
+        if (player.hasPermission("livessystem.bypass")) return;
 
         // PvP-only check
-        boolean pvpOnly = plugin.getConfig().getBoolean("drop-token-pvp-only", false);
-        if (pvpOnly) {
+        if (plugin.getConfig().getBoolean("drop-token-pvp-only", false)) {
             Entity killer = player.getKiller();
             if (!(killer instanceof Player)) return;
         }
 
-        // Add the token to the event's drop list instead of spawning it in the world.
-        // Corps mod (and similar mods) read from this list to populate the corpse,
-        // so the token will appear inside the corpse rather than on the ground.
+        // Add to the event drops list — Corps reads this list to populate
+        // the corpse, so the token ends up inside the corpse inventory.
+        // If Corps is not installed it falls to the ground normally.
         ItemStack token = plugin.getItemManager().createLifeToken();
         event.getDrops().add(token);
     }
