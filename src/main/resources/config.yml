@@ -1,0 +1,123 @@
+# ==============================
+#       LivesSystem Config
+# ==============================
+
+# How many lives players start with
+starting-lives: 5
+
+# Maximum lives a player can hold at once
+max-lives: 10
+
+# How many lives a player gets when revived
+revive-lives: 1
+
+# Minimum lives a player must keep after withdrawing (they cannot go below this)
+withdraw-min-lives: 2
+
+# How many lives a Life Token grants when used
+life-token-lives: 1
+
+# Enable or disable the TAB list lives display
+tab-display: true
+
+# Format for TAB display (%lives% = number, supports & color codes)
+tab-format: "&c❤ %lives% lives"
+
+# Color thresholds for the lives display in TAB
+tab-colors:
+  high: "&a"    # 4+ lives
+  medium: "&e"  # 2-3 lives
+  low: "&c"     # 1 life
+  dead: "&8"    # eliminated
+
+# Enable action bar messages on death/revive
+action-bar: true
+
+# ==============================
+#  Messages (& color codes)
+# ==============================
+messages:
+  death-lost-life: "&cYou lost a life! You have &e%lives% &clives remaining."
+  death-eliminated: "&4You have been eliminated! You are now in spectator mode."
+  revived: "&aYou have been revived by &e%player%&a! You have &e%lives% &alives."
+  revived-other: "&aYou revived &e%player%&a!"
+  life-token-used: "&aYou used a Life Token! You now have &e%lives% &alives."
+  at-max-lives: "&cYou are already at the maximum number of lives!"
+  target-not-dead: "&cThat player is not eliminated!"
+  no-permission: "&cYou don't have permission to do that."
+  player-not-found: "&cPlayer not found."
+  config-reloaded: "&aConfig reloaded!"
+  data-reset: "&aAll lives data has been reset!"
+  withdraw-success: "&aYou withdrew &e%amount% &alife/lives and received &e%amount% &aLife Token(s). You now have &e%lives% &alives."
+  withdraw-too-few: "&cYou need to keep at least &e%min% &clives. You currently have &e%lives%&c."
+  no-eliminated: "&eNo players are currently eliminated."
+
+# ==============================
+#  Revive Book item
+# ==============================
+# NOTE: The item is identified by its display name.
+# If you change the name here, update the datapack recipe result name to match!
+revive-book:
+  material: BOOK
+  name: "&6&lRevive Book"
+  lore:
+    - "&7Right-click to open the revive menu."
+    - ""
+    - "&eGrants: &c%revive-lives% life/lives on revive"
+  consume-on-use: true
+
+# ==============================
+#  Life Token item
+# ==============================
+# NOTE: The item is identified by its display name.
+# If you change the name here, update the datapack recipe result name to match!
+life-token:
+  material: NETHER_STAR
+  name: "&b&lLife Token"
+  lore:
+    - "&7Right-click to gain an extra life."
+    - ""
+    - "&eGrants: &a+%token-lives% life/lives"
+  consume-on-use: true
+
+# ==============================
+#  Sounds
+# ==============================
+sounds:
+  death: ENTITY_WITHER_DEATH
+  eliminated: ENTITY_WITHER_SPAWN
+  revived: ENTITY_PLAYER_LEVELUP
+  life-token: ENTITY_EXPERIENCE_ORB_PICKUP
+
+# ==============================
+#  Recipe grids (managed in-game via /editrevivebookrecipe and /editlifetokenrecipe)
+#  Slots 0-8 map to the 3x3 crafting grid left-to-right, top-to-bottom.
+#  You can edit these manually or use the in-game editor commands.
+# ==============================
+revive-book:
+  recipe:
+    shaped: true
+    grid:
+      0: NETHER_STAR
+      1: SOUL_SAND
+      2: NETHER_STAR
+      3: SOUL_SAND
+      4: ENCHANTED_BOOK
+      5: SOUL_SAND
+      6: NETHER_STAR
+      7: SOUL_SAND
+      8: NETHER_STAR
+
+life-token:
+  recipe:
+    shaped: true
+    grid:
+      0: GOLD_NUGGET
+      1: IRON_NUGGET
+      2: GOLD_NUGGET
+      3: IRON_NUGGET
+      4: NETHER_STAR
+      5: IRON_NUGGET
+      6: GOLD_NUGGET
+      7: IRON_NUGGET
+      8: GOLD_NUGGET
