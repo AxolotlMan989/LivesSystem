@@ -1,0 +1,68 @@
+name: LivesSystem
+version: ${project.version}
+main: com.axolotl.livessystem.LivesSystem
+api-version: 1.20
+description: A configurable lives system with revive mechanics
+author: AxolotlMan989
+
+commands:
+  lives:
+    description: Check your or another player's lives
+    usage: /lives [player]
+    permission: livessystem.lives
+  setlives:
+    description: Set a player's lives
+    usage: /setlives <player> <amount>
+    permission: livessystem.admin
+  addlives:
+    description: Add lives to a player
+    usage: /addlives <player> <amount>
+    permission: livessystem.admin
+  removelives:
+    description: Remove lives from a player
+    usage: /removelives <player> <amount>
+    permission: livessystem.admin
+  revivebook:
+    description: Give yourself or another player a revive book
+    usage: /revivebook [player]
+    permission: livessystem.admin
+  lifetoken:
+    description: Give yourself or another player a life token
+    usage: /lifetoken [player]
+    permission: livessystem.admin
+  livesreload:
+    description: Reload the plugin config
+    usage: /livesreload
+    permission: livessystem.admin
+  withdrawlife:
+    description: Withdraw a life and receive a Life Token
+    usage: /withdrawlife [amount]
+    permission: livessystem.withdraw
+  livesreset:
+    description: Reset all player lives data
+    usage: /livesreset
+    permission: livessystem.admin
+
+permissions:
+  livessystem.lives:
+    description: Check lives
+    default: true
+  livessystem.admin:
+    description: Admin commands
+    default: op
+  livessystem.withdraw:
+    description: Withdraw lives as Life Tokens
+    default: true
+  livessystem.bypass:
+    description: Bypass lives loss on death
+    default: false
+
+  editrevivebookrecipe:
+    description: Open the recipe editor for the Revive Book
+    usage: /editrevivebookrecipe
+    permission: livessystem.admin
+
+  editlifetokenrecipe:
+    description: Open the recipe editor for the Life Token
+    usage: /editlifetokenrecipe
+    permission: livessystem.admin
