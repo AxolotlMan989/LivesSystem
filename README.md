@@ -61,8 +61,9 @@ You cannot drop the source code directly into your server — you need to compil
 - **Spectator mode on elimination** — players with 0 lives are automatically moved to Spectator and restored on revive
 - **Revive Book** — right-click to open a paginated GUI showing all eliminated players as their own heads; click a head to revive them
 - **Life Token** — right-click in hand to instantly gain extra lives
+- **Life Token drops on death** — players drop a Life Token when they die, letting killers claim it or the victim recover it; configurable to PvP-only
 - **Life withdrawing** — players can convert their own lives into Life Tokens to share with others
-- **In-game recipe editor** — change crafting recipes for both items without ever editing a file or restarting
+- **In-game recipe editor** — change crafting recipes for both items without ever editing a file or restarting, with support for plugin items as ingredients
 - **Shaped and shapeless recipes** — toggle between recipe types in the editor GUI
 - **TAB list display** — shows each player's lives next to their name, color-coded by how many they have left
 - **Action bar messages** — death, elimination, and revive notifications shown on screen
@@ -87,9 +88,9 @@ Used to bring eliminated players back into the game.
 
 **Default recipe (shaped):**
 ```
-N S N
-S B S    N = Nether Star  |  S = Soul Sand  |  B = Enchanted Book
-N S N
+T S T
+S T S    T = Life Token  |  S = Soul Sand
+T S T
 ```
 
 ---
@@ -105,6 +106,7 @@ Used to grant yourself an extra life.
 **How to obtain:**
 - Admin command: `/lifetoken [player]`
 - Crafting table (default recipe below, changeable in-game via `/editlifetokenrecipe`)
+- Picked up from the ground after a player dies (if `drop-token-on-death` is enabled)
 - Another player using `/withdrawlife` to convert their own life into a token
 
 **Default recipe (shaped):**
@@ -119,7 +121,7 @@ G I G
 ### ⚠️ Item Identification Note
 Items are identified by their **display name**. This means:
 - Any item renamed to match (e.g. via anvil) will be treated as that item
-- If you change an item's `name` in `config.yml`, make sure to also update the recipe via `/editrevivebookrecipe` or `/editlifetokenrecipe` so the crafted result still gets recognised
+- If you change an item's `name` in `config.yml`, make sure to also update the recipe via the editor commands so the crafted result is still recognised
 - The admin commands (`/revivebook`, `/lifetoken`) always give correctly named items
 
 ---
@@ -154,7 +156,7 @@ Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe
 [ . ][ 4 ][ 5 ][ 6 ][ . ][ ▶ ][ . ][ . ][ . ]
 [ . ][ 7 ][ 8 ][ 9 ][ . ][ . ][ . ][ . ][ . ]
 [ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]
-[SAV][ . ][ . ][ . ][MOD][ . ][ . ][ . ][CLO]
+[SAV][ . ][ . ][ . ][MOD][ . ][RBK][LTK][CLO]
 ```
 
 | Button | Description |
@@ -162,11 +164,14 @@ Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe
 | Slots 1–9 | The crafting grid — drag items from your inventory into these slots |
 | OUT | Preview of the resulting named item (display only) |
 | MOD | Toggle between **Shaped** (position matters) and **Shapeless** (any order) |
+| RBK | Insert a **Revive Book** slot into the next empty grid space |
+| LTK | Insert a **Life Token** slot into the next empty grid space |
 | SAV | Save the recipe and activate it immediately |
 | CLO | Close without saving — items are returned to your inventory |
 
 **Tips:**
 - Shift-click an item from your inventory to send it straight to the first empty grid slot
+- Use RBK/LTK to require plugin items as ingredients — these match by display name, not just material
 - Any items left in the grid when you close or save are automatically returned to you
 - The recipe activates instantly on save — no reload or restart needed
 - Recipes are saved to `config.yml` and persist across restarts
@@ -175,15 +180,34 @@ Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe
 
 ## ⌨️ Commands
 
+### 👤 Player Commands
+Available to all players by default.
+
 | Command | Description | Permission |
 |---|---|---|
 | `/lives [player]` | Check your own or another player's lives | `livessystem.lives` |
+| `/withdrawlife [amount]` | Convert one or more of your lives into Life Tokens | `livessystem.withdraw` |
+
+---
+
+### 🛡️ Admin Commands
+OP only by default.
+
+| Command | Description | Permission |
+|---|---|---|
 | `/setlives <player> <amount>` | Set a player's lives to a specific amount | `livessystem.admin` |
 | `/addlives <player> <amount>` | Add lives to a player | `livessystem.admin` |
 | `/removelives <player> <amount>` | Remove lives from a player | `livessystem.admin` |
 | `/revivebook [player]` | Give a Revive Book to yourself or a player | `livessystem.admin` |
 | `/lifetoken [player]` | Give a Life Token to yourself or a player | `livessystem.admin` |
-| `/withdrawlife [amount]` | Convert one or more of your lives into Life Tokens | `livessystem.withdraw` |
+
+---
+
+### 🔧 Debug / Config Commands
+OP only by default.
+
+| Command | Description | Permission |
+|---|---|---|
 | `/editrevivebookrecipe` | Open the recipe editor for the Revive Book | `livessystem.admin` |
 | `/editlifetokenrecipe` | Open the recipe editor for the Life Token | `livessystem.admin` |
 | `/livesreload` | Reload `config.yml` without restarting | `livessystem.admin` |
@@ -196,7 +220,7 @@ Run `/editrevivebookrecipe` or `/editlifetokenrecipe` to open the in-game recipe
 | Permission | Description | Default |
 |---|---|---|
 | `livessystem.lives` | Check lives with `/lives` | Everyone |
-| `livessystem.admin` | All admin commands | OP only |
+| `livessystem.admin` | All admin and debug commands | OP only |
 | `livessystem.withdraw` | Use `/withdrawlife` | Everyone |
 | `livessystem.bypass` | Never lose lives on death | Nobody |
 
@@ -214,6 +238,10 @@ revive-lives: 1           # Lives given to a player when revived
 life-token-lives: 1       # Lives granted by one Life Token
 withdraw-min-lives: 2     # Minimum lives a player must keep when withdrawing
 
+# Life Token drop on death
+drop-token-on-death: true      # Whether a Life Token drops when a player dies
+drop-token-pvp-only: false     # If true, token only drops on player kills
+
 # TAB list
 tab-display: true
 tab-format: "&c❤ %lives% lives"   # %lives% = current lives count
@@ -228,7 +256,7 @@ action-bar: true
 
 # Revive Book item
 revive-book:
-  material: BOOK
+  material: ENCHANTED_BOOK
   name: "&6&lRevive Book"
   lore:
     - "&7Right-click to open the revive menu."

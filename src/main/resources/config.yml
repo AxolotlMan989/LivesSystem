@@ -86,7 +86,7 @@ revive-book:
       1: SOUL_SAND
       2: PLUGIN_LIFE_TOKEN
       3: SOUL_SAND
-      4: ENCHANTED_BOOK
+      4: PLUGIN_LIFE_TOKEN
       5: SOUL_SAND
       6: PLUGIN_LIFE_TOKEN
       7: SOUL_SAND
@@ -113,12 +113,22 @@ life-token:
   recipe:
     shaped: true
     grid:
-      0: SOUL_SAND
+      0: GOLD_NUGGET
       1: IRON_NUGGET
-      2: SOUL_SAND
+      2: GOLD_NUGGET
       3: IRON_NUGGET
       4: NETHER_STAR
       5: IRON_NUGGET
-      6: SOUL_SAND
+      6: GOLD_NUGGET
       7: IRON_NUGGET
-      8: SOUL_SAND
+      8: GOLD_NUGGET
+
+# ==============================
+#  Drop Life Token on Death
+# ==============================
+# Whether players drop a Life Token when they die
+drop-token-on-death: true
+
+# If true, tokens only drop when the player was killed by another player.
+# If false, tokens drop on any death (mobs, fall, fire, etc.)
+drop-token-pvp-only: false
