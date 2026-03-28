@@ -17,35 +17,33 @@ public class PlayerDeathListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    // Run at LOW priority so we add to the drops list BEFORE Corps (or any other
+    // death loot mod) reads it at NORMAL/HIGH priority and collects items.
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
-        // Handle lives loss first
+        // Handle lives loss
         plugin.getLivesManager().handleDeath(player);
 
         // Don't drop a token if the feature is disabled
         if (!plugin.getConfig().getBoolean("drop-token-on-death", true)) return;
 
-        // Don't drop a token if the player is already eliminated (0 lives)
-        // handleDeath() already decremented, so check if they had at least 1 life
-        // before death — meaning they had >0 lives before this death occurred.
-        // We do this by checking if they still have >=0 lives after the decrement;
-        // if lives == 0 they were just eliminated, they still get a token dropped.
-        // But if they were already at 0 before death, skip (shouldn't happen since
-        // eliminated players are in spectator, but guard anyway).
+        // Don't drop if player was already eliminated before this death
         int livesAfter = plugin.getLivesManager().getLives(player.getUniqueId());
-        if (livesAfter < 0) return; // safety guard
+        if (livesAfter < 0) return;
 
-        // PvP-only mode — check if the killer was a player
+        // PvP-only check
         boolean pvpOnly = plugin.getConfig().getBoolean("drop-token-pvp-only", false);
         if (pvpOnly) {
             Entity killer = player.getKiller();
             if (!(killer instanceof Player)) return;
         }
 
-        // Drop a Life Token at the player's death location
+        // Add the token to the event's drop list instead of spawning it in the world.
+        // Corps mod (and similar mods) read from this list to populate the corpse,
+        // so the token will appear inside the corpse rather than on the ground.
         ItemStack token = plugin.getItemManager().createLifeToken();
-        player.getWorld().dropItemNaturally(player.getLocation(), token);
+        event.getDrops().add(token);
     }
 }
