@@ -23,12 +23,20 @@ tab-display: true
 # Format for TAB display (%lives% = number, supports & color codes)
 tab-format: "&c❤ %lives% lives"
 
-# Color thresholds for the lives display in TAB
+# Color per lives count in TAB (0-10).
+# Lives above 10 use the color for 10.
 tab-colors:
-  high: "&a"    # 4+ lives
-  medium: "&e"  # 2-3 lives
-  low: "&c"     # 1 life
-  dead: "&8"    # eliminated
+  0:  "&8"    # eliminated
+  1:  "&4"
+  2:  "&c"
+  3:  "&6"
+  4:  "&e"
+  5:  "&e"
+  6:  "&a"
+  7:  "&a"
+  8:  "&a"
+  9:  "&2"
+  10: "&2"
 
 # Enable action bar messages on death/revive
 action-bar: true

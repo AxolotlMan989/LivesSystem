@@ -1,6 +1,7 @@
 package com.axolotl.livessystem;
 
 import com.axolotl.livessystem.commands.*;
+import com.axolotl.livessystem.gui.ConfigGUI;
 import com.axolotl.livessystem.gui.RecipeEditorGUI;
 import com.axolotl.livessystem.gui.ReviveGUI;
 import com.axolotl.livessystem.listeners.CraftItemListener;
@@ -22,6 +23,7 @@ public class LivesSystem extends JavaPlugin {
     private ReviveGUI        reviveGUI;
     private RecipeEditorGUI  recipeEditorGUI;
     private CraftItemListener craftItemListener;
+    private ConfigGUI         configGUI;
 
     @Override
     public void onEnable() {
@@ -34,6 +36,7 @@ public class LivesSystem extends JavaPlugin {
         this.reviveGUI         = new ReviveGUI(this);
         this.recipeEditorGUI   = new RecipeEditorGUI(this);
         this.craftItemListener = new CraftItemListener(this);
+        this.configGUI         = new ConfigGUI(this);
 
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this),    this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this),     this);
@@ -52,6 +55,7 @@ public class LivesSystem extends JavaPlugin {
         WithdrawLifeCommand withdrawLifeCommand = new WithdrawLifeCommand(this);
         getCommand("withdrawlife").setExecutor(withdrawLifeCommand);
         getCommand("withdrawlife").setTabCompleter(withdrawLifeCommand);
+        getCommand("lsconfig").setExecutor(new ConfigCommand(this));
         getCommand("editrevivebookrecipe").setExecutor(new EditRecipeCommand(this, "revivebook"));
         getCommand("editlifetokenrecipe").setExecutor(new EditRecipeCommand(this, "lifetoken"));
 
@@ -79,4 +83,5 @@ public class LivesSystem extends JavaPlugin {
     public ReviveGUI    getReviveGUI()               { return reviveGUI; }
     public RecipeEditorGUI getRecipeEditorGUI()      { return recipeEditorGUI; }
     public CraftItemListener getCraftItemListener()  { return craftItemListener; }
+    public ConfigGUI         getConfigGUI()           { return configGUI; }
 }

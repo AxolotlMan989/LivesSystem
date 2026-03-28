@@ -89,7 +89,7 @@ Used to bring eliminated players back into the game.
 **Default recipe (shaped):**
 ```
 T S T
-S B S    T = Life Token  |  S = Soul Sand | B = Enchanted Book
+S T S    T = Life Token  |  S = Soul Sand
 T S T
 ```
 
@@ -111,9 +111,9 @@ Used to grant yourself an extra life.
 
 **Default recipe (shaped):**
 ```
-S I S
-I N I    S = Soul Sand  |  I = Iron Nugget  |  N = Nether Star
-S I S
+G I G
+I N I    G = Gold Nugget  |  I = Iron Nugget  |  N = Nether Star
+G I G
 ```
 
 ---

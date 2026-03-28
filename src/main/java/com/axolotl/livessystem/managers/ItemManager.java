@@ -69,6 +69,7 @@ public class ItemManager {
     // (which can't carry NBT) are recognised the same as /revivebook or /lifetoken items.
 
     public boolean isReviveBook(ItemStack item) {
+        if (!plugin.getConfig().getBoolean("revive-book.enabled", true)) return false;
         if (item == null || !item.hasItemMeta()) return false;
         String displayName = item.getItemMeta().getDisplayName();
         String expected    = colorize(plugin.getConfig().getString("revive-book.name", "&6&lRevive Book"));
@@ -76,6 +77,7 @@ public class ItemManager {
     }
 
     public boolean isLifeToken(ItemStack item) {
+        if (!plugin.getConfig().getBoolean("life-token.enabled", true)) return false;
         if (item == null || !item.hasItemMeta()) return false;
         String displayName = item.getItemMeta().getDisplayName();
         String expected    = colorize(plugin.getConfig().getString("life-token.name", "&b&lLife Token"));
